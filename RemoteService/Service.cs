@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RemoteService.CommandHandlers;
+using System;
 using System.IO;
-using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
 
@@ -64,6 +63,24 @@ namespace RemoteService
 
             _isConnected = _client.Connect(_config.ServerAddress, Convert.ToUInt16(_config.ServerPort), _config.MachineId, ref errMsg);
             _client.SetReceivedFilesFolder(_receivedFilesPath);
+
+            InitializeCommandHandlers();
+        }
+
+        private void InitializeCommandHandlers()
+        {
+            var zeroLengthHandler = new ZeroLengthCommandHandler();
+            var shutdownHandler = new ShutdownCommandHandler();
+            var restartHandler = new RestartCommandHandler();
+            var logoutHandler = new LogOutCommandHandler();
+            var checkProcessHandler = new CheckProcessCommandHandler();
+            var killProcessHandler = new KillProcessCommandHandler();
+            var runHandler = new RunCommandHandler(_receivedFilesPath);
+
+            _commandHandler = zeroLengthHandler.SetNextHandler(shutdownHandler)
+                .SetNextHandler(restartHandler).SetNextHandler(logoutHandler)
+                .SetNextHandler(checkProcessHandler).SetNextHandler(killProcessHandler)
+                .SetNextHandler(runHandler);
         }
 
         private void InitializeDirectories()
