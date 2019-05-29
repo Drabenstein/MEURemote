@@ -31,7 +31,7 @@ namespace Remote
         {
             if (dataChannel < 251)
             {
-                UI(delegate () { this.lbox_log.Items.Add("Session " + sessionID.ToString() + ": " + TcpComm.Utilities.BytesToString(bytes)); });
+                UI(delegate () { this.lbox_log.Items.Add("Session " + sessionID + ": " + TcpComm.Utilities.BytesToString(bytes)); });
             }
             else if (dataChannel == 255)
             {

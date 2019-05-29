@@ -13,7 +13,7 @@ namespace Remote
         public const string SvrKillprocess = "KILLPROCESS";
         public const string SvrRun = "RUN";
         #endregion
-        private static Dictionary<string, string> _commandsWithDes = new Dictionary<string, string>()
+        private static Dictionary<string, string> _commandsDescriptions = new Dictionary<string, string>()
         {
             [SvrShutdown] = "Zamyka system",
             [SvrRestart] = "Ponownie uruchamia system",
@@ -41,7 +41,7 @@ namespace Remote
         public static List<string> GetCommandsList()
         {
             List<string> commands = new List<string>();
-            foreach (var command in _commandsWithDes)
+            foreach (var command in _commandsDescriptions)
             {
                 commands.Add(command.Key);
             }
@@ -54,7 +54,7 @@ namespace Remote
         /// <returns></returns>
         public static Dictionary<string, string> GetCommandsDescriptions()
         {
-            return _commandsWithDes;
+            return _commandsDescriptions;
         }
 
         /// <summary>

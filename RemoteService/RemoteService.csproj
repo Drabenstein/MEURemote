@@ -52,7 +52,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandHandlers\BaseCommandHandler.cs" />
+    <Compile Include="CommandHandlers\CheckProcessCommandHandler.cs" />
+    <Compile Include="CommandHandlers\KillProcessCommandHandler.cs" />
+    <Compile Include="CommandHandlers\LogOutCommandHandler.cs" />
+    <Compile Include="CommandHandlers\RestartCommandHandler.cs" />
+    <Compile Include="CommandHandlers\RunCommandHandler.cs" />
+    <Compile Include="CommandHandlers\ShutdownCommandHandler.cs" />
+    <Compile Include="CommandHandlers\ZeroLengthCommandHandler.cs" />
     <Compile Include="CommonActions.cs" />
+    <Compile Include="ICommandHandler.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
     </Compile>

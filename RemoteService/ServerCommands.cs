@@ -8,8 +8,8 @@ namespace RemoteService
         public const string SvrRestart = "RESTART";
         public const string SvrLogoff = "LOGOFF";
         public const string SvrLogout = "LOGOUT";
-        public const string SvrCheckprocess = "CHECKPROCESS";
-        public const string SvrKillprocess = "KILLPROCESS";
+        public const string SvrCheckProcess = "CHECKPROCESS";
+        public const string SvrKillProcess = "KILLPROCESS";
         public const string SvrRun = "RUN";
 
         /// <summary>
@@ -24,8 +24,8 @@ namespace RemoteService
             commands.Add(SvrRestart);
             commands.Add(SvrLogout);
             commands.Add(SvrLogoff);
-            commands.Add(SvrKillprocess);
-            commands.Add(SvrCheckprocess);
+            commands.Add(SvrKillProcess);
+            commands.Add(SvrCheckProcess);
             return commands;
         }
     }
