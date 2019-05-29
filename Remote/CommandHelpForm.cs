@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Remote
@@ -15,18 +10,18 @@ namespace Remote
         public CommandHelpForm()
         {
             InitializeComponent();
-            Dictionary<string, string> cmdsWithDesc = ServerCommands.GetCommandsWithDescription();
-            Dictionary<string, string> cmdsWithSyntax = ServerCommands.GetCommandsWithSyntax();
-            foreach (var item in cmdsWithDesc)
+            Dictionary<string, string> commandsDescriptions = ServerCommands.GetCommandsDescriptions();
+            Dictionary<string, string> commandsSyntaxExamples = ServerCommands.GetCommandsSyntaxExamples();
+            foreach (var item in commandsDescriptions)
             {
-                ListViewItem lvi = new ListViewItem(item.Key);
-                lvi.SubItems.Add(item.Value);
-                lvi.SubItems.Add(cmdsWithSyntax.FirstOrDefault(x => x.Key == item.Key).Value);
-                lv_commands.Items.Add(lvi);
+                ListViewItem listViewItem = new ListViewItem(item.Key);
+                listViewItem.SubItems.Add(item.Value);
+                listViewItem.SubItems.Add(commandsSyntaxExamples.FirstOrDefault(x => x.Key == item.Key).Value);
+                lv_commands.Items.Add(listViewItem);
             }
         }
 
-        private void kopiujToolStripMenuItem_Click(object sender, EventArgs e)
+        private void menuItem_copy_Click(object sender, EventArgs e)
         {
             if (lv_commands.SelectedItems.Count > 0)
             {

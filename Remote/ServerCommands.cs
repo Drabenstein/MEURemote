@@ -5,65 +5,65 @@ namespace Remote
     public static class ServerCommands
     {
         #region Commands
-        public const string SVR_SHUTDOWN = "SHUTDOWN";
-        public const string SVR_RESTART = "RESTART";
-        public const string SVR_LOGOFF = "LOGOFF";
-        public const string SVR_LOGOUT = "LOGOUT";
-        public const string SVR_CHECKPROCESS = "CHECKPROCESS";
-        public const string SVR_KILLPROCESS = "KILLPROCESS";
-        public const string SVR_RUN = "RUN"; 
+        public const string SvrShutdown = "SHUTDOWN";
+        public const string SvrRestart = "RESTART";
+        public const string SvrLogoff = "LOGOFF";
+        public const string SvrLogout = "LOGOUT";
+        public const string SvrCheckprocess = "CHECKPROCESS";
+        public const string SvrKillprocess = "KILLPROCESS";
+        public const string SvrRun = "RUN";
         #endregion
         private static Dictionary<string, string> _commandsWithDes = new Dictionary<string, string>()
         {
-            {SVR_SHUTDOWN, "Zamyka system" },
-            {SVR_RESTART, "Ponownie uruchamia system" },
-            {SVR_LOGOUT, "Wylogowywuje obecnie zalogowanego użytkownika" },
-            {SVR_LOGOFF, "Wylogowywuje obecnie zalogowanego użytkownika" },
-            {SVR_RUN, "Urachamia proces (exe) z podanej ścieżki (domyślnie szuka w katalogu plików odebranych przez klienta)" },
-            {SVR_CHECKPROCESS, "Sprawdza czy dany proces jest uruchomiony na komputerze" },
-            {SVR_KILLPROCESS, "Natychmiastowo zamyka wszystkie procesy o danej nazwie" }
+            [SvrShutdown] = "Zamyka system",
+            [SvrRestart] = "Ponownie uruchamia system",
+            [SvrLogout] = "Wylogowywuje obecnie zalogowanego użytkownika",
+            [SvrLogoff] = "Wylogowywuje obecnie zalogowanego użytkownika",
+            [SvrRun] = "Urachamia proces (exe) z podanej ścieżki (domyślnie szuka w katalogu plików odebranych przez klienta)",
+            [SvrCheckprocess] = "Sprawdza czy dany proces jest uruchomiony na komputerze",
+            [SvrKillprocess] = "Natychmiastowo zamyka wszystkie procesy o danej nazwie"
         };
-        private static Dictionary<string, string> _commandsWithSyntax = new Dictionary<string, string>()
+        private static Dictionary<string, string> _commandsSyntaxExamples = new Dictionary<string, string>()
         {
-            {SVR_SHUTDOWN, "Shutdown" },
-            {SVR_RESTART, "Restart" },
-            {SVR_LOGOUT, "LogOut" },
-            {SVR_LOGOFF, "LogOff" },
-            {SVR_RUN, "Run C:/Windows/System32/cmd.exe" },
-            {SVR_CHECKPROCESS, "CheckProcess chrome" },
-            {SVR_KILLPROCESS, "KillProcess chrome" }
+            [SvrShutdown] = "Shutdown",
+            [SvrRestart] = "Restart",
+            [SvrLogout] = "LogOut",
+            [SvrLogoff] = "LogOff",
+            [SvrRun] = "Run C:/Windows/System32/cmd.exe",
+            [SvrCheckprocess] = "CheckProcess chrome",
+            [SvrKillprocess] = "KillProcess chrome"
         };
 
         /// <summary>
-        /// Zwraca listę poleceń
+        /// Gets list of available commands
         /// </summary>
         /// <returns></returns>
-        public static List<string> GetCommandList()
+        public static List<string> GetCommandsList()
         {
-            List<string> cmds = new List<string>();
-            foreach (var item in _commandsWithDes)
+            List<string> commands = new List<string>();
+            foreach (var command in _commandsWithDes)
             {
-                cmds.Add(item.Key);
+                commands.Add(command.Key);
             }
-            return cmds;
+            return commands;
         }
 
         /// <summary>
-        /// Zwraca słownik o kluczu = nazwa polecenia i wartości = opis polecenia
+        /// Gets commands' descriptions
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, string> GetCommandsWithDescription()
+        public static Dictionary<string, string> GetCommandsDescriptions()
         {
             return _commandsWithDes;
         }
 
         /// <summary>
-        /// Zwraca słownik o kluczu = nazwa polecenia i wartości = przykładowa składnia
+        /// Gets commands' syntax examples
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, string> GetCommandsWithSyntax()
+        public static Dictionary<string, string> GetCommandsSyntaxExamples()
         {
-            return _commandsWithSyntax;
+            return _commandsSyntaxExamples;
         }
     }
 }

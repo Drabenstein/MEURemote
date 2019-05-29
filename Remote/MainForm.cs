@@ -12,45 +12,22 @@ namespace Remote
         private int _clientsSortColumn = -1;
         private int _filesSortColumn = -1;
 
-        #region methods
         public MainForm()
         {
             InitializeComponent();
-            this.StatusLabel_status.Text = "Bezczynny";
+            this.statusLabel_status.Text = "Bezczynny";
             ImageList imgList = new ImageList();
             imgList.Images.Add("connected", Resources.user_available);
             imgList.Images.Add("disconnected", Resources.user_invisible);
-            lv_Clients.SmallImageList = imgList;
-            List<string> cmds = ServerCommands.GetCommandList();
-            foreach (string cmd in cmds)
+            lv_clients.SmallImageList = imgList;
+            List<string> commands = ServerCommands.GetCommandsList();
+            foreach (string cmd in commands)
             {
                 combo_command.Items.Add(cmd);
             }
         }
 
-        private void button_start_Click(object sender, EventArgs e)
-        {
-            if (button_start.Text == "Uruchom serwer")
-            {
-                _server = new TcpComm.Server(UpdateUI, enforceUniqueMachineId: checkBox_EnforceID.Checked);
-                string errMsg = "";
-                _server.Start(5010, ref errMsg);
-                System.Threading.Thread ftm = new System.Threading.Thread(FileTransferMonitor);
-                ftm.Start();
-                button_start.Text = "Zatrzymaj serwer";
-            }
-            else
-            {
-                if (_server != null)
-                {
-                    _server.Close();
-                    this.lv_Clients.Items.Clear();
-                    button_start.Text = "Uruchom serwer";
-                }
-            }
-        }
-
-        public void UpdateUI(byte[] bytes, int sessionID, byte dataChannel)
+        public void UpdateUi(byte[] bytes, int sessionID, byte dataChannel)
         {
             if (dataChannel < 251)
             {
@@ -59,148 +36,153 @@ namespace Remote
             else if (dataChannel == 255)
             {
                 string tmp = "";
-                string msg = TcpComm.Utilities.BytesToString(bytes);
-                bool dontReport = false;
+                string message = TcpComm.Utilities.BytesToString(bytes);
 
-                if (msg.Length > 3)
+                if (message.Length > 3)
                 {
-                    tmp = msg.Substring(0, 3);
+                    tmp = message.Substring(0, 3);
                 }
 
                 if (tmp == "UBS")
                 {
-                    // Wątpliwa część
-                    string[] parts = msg.Split(new string[] { "U", "B", "S", ":" }, StringSplitOptions.None);
-                    msg = "Dane zostały wysłane do sesji o ID: " + parts[1];
+                    string[] parts = message.Split(new string[] { "U", "B", "S", ":" }, StringSplitOptions.None);
+                    message = "Dane zostały wysłane do sesji o ID: " + parts[1];
                 }
 
-                if (msg == "Connected.")
+                if (message == "Connected.")
                 {
-                    UI(updateClientsList);
+                    UI(UpdateClientsList);
                 }
 
-                if (msg.Contains(" MachineID:"))
+                if (message.Contains(" MachineID:"))
                 {
-                    UI(updateClientsList);
+                    UI(UpdateClientsList);
                 }
 
-                if (msg.Contains("Session Stopped. ("))
+                if (message.Contains("Session Stopped. ("))
                 {
-                    UI(updateClientsList);
+                    UI(UpdateClientsList);
                 }
 
-                if (!dontReport)
-                {
-                    UI(() => this.StatusLabel_status.Text = msg);
-                }
+                UI(() => this.statusLabel_status.Text = message);
             }
         }
 
         private void UI(Action uiUpdate)
         {
-            if (this.InvokeRequired)
+            try
             {
-                try
+                if (this.InvokeRequired)
                 {
                     this.Invoke(new MethodInvoker(uiUpdate));
                 }
-                catch (Exception)
-                {
-                }
-            }
-            else
-            {
-                try
+                else
                 {
                     uiUpdate();
                 }
-                catch (Exception)
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            if (button_startServer.Text == "Uruchom serwer")
+            {
+                _server = new TcpComm.Server(UpdateUi, enforceUniqueMachineId: checkBox_EnforceID.Checked);
+                string errMsg = "";
+                _server.Start(5010, ref errMsg);
+                System.Threading.Thread ftm = new System.Threading.Thread(FileTransferMonitor);
+                ftm.Start();
+                button_startServer.Text = "Zatrzymaj serwer";
+            }
+            else
+            {
+                if (_server != null)
                 {
+                    _server.Close();
+                    this.lv_clients.Items.Clear();
+                    button_startServer.Text = "Uruchom serwer";
                 }
             }
         }
 
-        private void updateClientsList()
+        private void UpdateClientsList()
         {
             List<TcpComm.Server.SessionCommunications> sessionList = _server.GetSessionCollection();
-            ListViewItem lvi;
-            this.lv_Clients.Items.Clear();
+            lv_clients.Items.Clear();
 
             foreach (TcpComm.Server.SessionCommunications session in sessionList)
             {
+                ListViewItem clientListItem;
                 if (session.IsRunning)
                 {
-                    lvi = new ListViewItem(" Connected", 0, lv_Clients.Groups[0]);
-                    lvi.ImageKey = "connected";
+                    clientListItem = new ListViewItem(" Connected", 0, lv_clients.Groups[0]);
+                    clientListItem.ImageKey = "connected";
                 }
                 else
                 {
-                    lvi = new ListViewItem(" Disconnected", 1, lv_Clients.Groups[1]);
-                    lvi.ImageKey = "disconnected";
+                    clientListItem = new ListViewItem(" Disconnected", 1, lv_clients.Groups[1]);
+                    clientListItem.ImageKey = "disconnected";
                 }
 
-                lvi.SubItems.Add(session.sessionID.ToString());
-                lvi.SubItems.Add(session.machineId);
-                this.lv_Clients.Items.Add(lvi);
+                clientListItem.SubItems.Add(session.sessionID.ToString());
+                clientListItem.SubItems.Add(session.machineId);
+                this.lv_clients.Items.Add(clientListItem);
             }
         }
 
         private void FileTransferMonitor()
         {
-            DateTime waitTimeout;
-            List<TcpComm.Server.SessionCommunications> sessions;
-            bool moveOn = false;
-
             while (_server.IsRunning)
             {
-                waitTimeout = DateTime.Now.AddMilliseconds(100);
+                DateTime waitTimeout = DateTime.Now.AddMilliseconds(100);
                 while (DateTime.Now < waitTimeout)
                 {
                     System.Threading.Thread.Sleep(1);
                 }
 
-                sessions = _server.GetSessionCollection();
+                List<TcpComm.Server.SessionCommunications> sessions = _server.GetSessionCollection();
                 foreach (TcpComm.Server.SessionCommunications session in sessions)
                 {
-                    updateFileProgress(session);
+                    UpdateFileProgress(session);
                 }
             }
         }
 
-        private void updateFileProgress(TcpComm.Server.SessionCommunications session)
+        private void UpdateFileProgress(TcpComm.Server.SessionCommunications session)
         {
             bool moveOn = false;
-            int tmpId = -1;
-
-            moveOn = false;
 
             if (session.SendingFile)
             {
                 UI(() =>
                 {
-                    tmpId = -1;
-                    foreach (ListViewItem tlvi in lv_FileTransfer.Items)
+                    int itemSessionId = -1;
+                    foreach (ListViewItem fileTransferListItem in lv_fileTransfer.Items)
                     {
-                        Int32.TryParse(tlvi.SubItems[0].Text, out tmpId);
-                        if (tmpId == session.sessionID && tlvi.SubItems[2].Text.Equals("Wychodzące"))
+                        Int32.TryParse(fileTransferListItem.SubItems[0].Text, out itemSessionId);
+                        if (itemSessionId == session.sessionID && fileTransferListItem.SubItems[2].Text.Equals("Wychodzące"))
                         {
-                            tlvi.SubItems[3].Text = session.GetPercentOfFileSent().ToString() + "%";
+                            fileTransferListItem.SubItems[3].Text = session.GetPercentOfFileSent().ToString() + "%";
                             break;
                         }
                         else
                         {
-                            tmpId = -1;
+                            itemSessionId = -1;
                         }
                     }
 
-                    if (tmpId == -1)
+                    if (itemSessionId == -1)
                     {
-                        ListViewItem lvi = new ListViewItem();
-                        lvi.Text = session.sessionID.ToString();
-                        lvi.SubItems.Add(System.IO.Path.GetFileName(session.OutgingFileName));
-                        lvi.SubItems.Add("Wychodzące");
-                        lvi.SubItems.Add(session.GetPercentOfFileSent().ToString());
-                        lv_FileTransfer.Items.Add(lvi);
+                        ListViewItem progressListItem = new ListViewItem();
+                        progressListItem.Text = session.sessionID.ToString();
+                        progressListItem.SubItems.Add(System.IO.Path.GetFileName(session.OutgingFileName));
+                        progressListItem.SubItems.Add("Wychodzące");
+                        progressListItem.SubItems.Add(session.GetPercentOfFileSent().ToString());
+                        lv_fileTransfer.Items.Add(progressListItem);
                     }
 
                     moveOn = true;
@@ -208,54 +190,54 @@ namespace Remote
 
                 while (!moveOn)
                 {
-                    System.Threading.Thread.Sleep(1);
+                    System.Threading.Thread.Sleep(100);
                 }
             }
             else
             {
                 UI(() =>
                 {
-                    foreach (ListViewItem tlvi in lv_FileTransfer.Items)
+                    foreach (ListViewItem fileTransferListItem in lv_fileTransfer.Items)
                     {
-                        Int32.TryParse(tlvi.SubItems[0].Text, out tmpId);
-                        if (tmpId == session.sessionID && tlvi.SubItems[2].Text.Equals("Wychodzące"))
+                        Int32.TryParse(fileTransferListItem.SubItems[0].Text, out int currentSessionId);
+                        if (currentSessionId == session.sessionID && fileTransferListItem.SubItems[2].Text.Equals("Wychodzące"))
                         {
-                            lv_FileTransfer.Items.Remove(tlvi);
+                            lv_fileTransfer.Items.Remove(fileTransferListItem);
                             break;
                         }
                     }
                 });
             }
-
+            
             if (session.ReceivingFile)
             {
                 moveOn = false;
                 UI(() =>
                 {
-                    tmpId = -1;
-                    foreach (ListViewItem tlvi in lv_FileTransfer.Items)
+                    int currentSessionId = -1;
+                    foreach (ListViewItem transferListItem in lv_fileTransfer.Items)
                     {
-                        Int32.TryParse(tlvi.Text, out tmpId);
-                        if (tmpId == session.sessionID && tlvi.SubItems[2].Text.Equals("Przychodzące"))
+                        Int32.TryParse(transferListItem.Text, out currentSessionId);
+                        if (currentSessionId == session.sessionID && transferListItem.SubItems[2].Text.Equals("Przychodzące"))
                         {
-                            tlvi.SubItems[3].Text = session.GetPercentOfFileReceived().ToString() + "%";
+                            transferListItem.SubItems[3].Text = session.GetPercentOfFileReceived().ToString() + "%";
                             break;
                         }
                         else
                         {
-                            tmpId = -1;
+                            currentSessionId = -1;
                         }
                     }
 
-                    ListViewItem lvi = new ListViewItem();
+                    ListViewItem transferStatusListItem = new ListViewItem();
 
-                    if (tmpId == -1)
+                    if (currentSessionId == -1)
                     {
-                        lvi.Text = session.sessionID.ToString();
-                        lvi.SubItems.Add(System.IO.Path.GetFileName(session.IncomingFileName));
-                        lvi.SubItems.Add("Przychodzące");
-                        lvi.SubItems.Add(session.GetPercentOfFileReceived().ToString());
-                        lv_FileTransfer.Items.Add(lvi);
+                        transferStatusListItem.Text = session.sessionID.ToString();
+                        transferStatusListItem.SubItems.Add(System.IO.Path.GetFileName(session.IncomingFileName));
+                        transferStatusListItem.SubItems.Add("Przychodzące");
+                        transferStatusListItem.SubItems.Add(session.GetPercentOfFileReceived().ToString());
+                        lv_fileTransfer.Items.Add(transferStatusListItem);
                     }
 
                     moveOn = true;
@@ -270,12 +252,12 @@ namespace Remote
             {
                 UI(() =>
                 {
-                    foreach (ListViewItem tlvi in lv_FileTransfer.Items)
+                    foreach (ListViewItem tlvi in lv_fileTransfer.Items)
                     {
-                        Int32.TryParse(tlvi.SubItems[0].Text, out tmpId);
-                        if (tmpId == session.sessionID && tlvi.SubItems[2].Text.Equals("Przychodzące"))
+                        Int32.TryParse(tlvi.SubItems[0].Text, out int currentSessionId);
+                        if (currentSessionId == session.sessionID && tlvi.SubItems[2].Text.Equals("Przychodzące"))
                         {
-                            lv_FileTransfer.Items.Remove(tlvi);
+                            lv_fileTransfer.Items.Remove(tlvi);
                             break;
                         }
                     }
@@ -288,7 +270,7 @@ namespace Remote
             this.lbox_log.Items.Clear();
         }
 
-        private void button_SendCmd_Click(object sender, EventArgs e)
+        private void button_sendCommand_Click(object sender, EventArgs e)
         {
             if (this.combo_command.Text.Trim().Length > 0)
             {
@@ -296,46 +278,45 @@ namespace Remote
                 _server.SendText(this.combo_command.Text.Trim(), errMsg: ref errMsg);
             }
         }
-#endregion
-        private void SendFileMenuItem_Click(object sender, EventArgs e)
+
+        private void menuItem_sendFile_Click(object sender, EventArgs e)
         {
-            if (lv_Clients.SelectedItems.Count > 0)
+            if (lv_clients.SelectedItems.Count <= 0)
             {
-                ListViewItem lvi = lv_Clients.SelectedItems[0];
-                TcpComm.Server.SessionCommunications session = _server.GetSession(Convert.ToInt32(lvi.SubItems[1].Text));
-                string message;
-                string fileName;
-                if (session == null)
-                {
-                    MessageBox.Show("Wybrany klient jest rozłączony.", "Klient rozłączony", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                return;
+            }
 
-                message = "Wybierz plik do wysłania do: " + lvi.SubItems[2].Text;
-                openFileDialog1.Title = message;
-                openFileDialog1.FileName = "";
-                openFileDialog1.ShowDialog();
-                fileName = openFileDialog1.FileName;
-                if (fileName.Trim().Equals(""))
-                {
-                    return;
-                }
+            ListViewItem selectedItem = lv_clients.SelectedItems[0];
+            TcpComm.Server.SessionCommunications session = _server?.GetSession(Convert.ToInt32(selectedItem.SubItems[1].Text));
+            if (session == null)
+            {
+                MessageBox.Show("Wybrany klient jest rozłączony.", "Klient rozłączony", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-                if (!_server.SendFile(fileName, session.sessionID))
-                {
-                    MessageBox.Show("Klient został rozłączony", "Klient rozłączony", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+            string message = "Wybierz plik do wysłania do: " + selectedItem.SubItems[2].Text;
+            openFileDialog.Title = message;
+            openFileDialog.FileName = "";
+            openFileDialog.ShowDialog();
+            string fileName = openFileDialog.FileName;
+
+            if (fileName.Trim().Equals(""))
+            {
+                return;
+            }
+
+            if (!_server.SendFile(fileName, session.sessionID))
+            {
+                MessageBox.Show("Klient został rozłączony", "Klient rozłączony", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        #region additionalMethods
-        private void SendCmdMenuItem_Click(object sender, EventArgs e)
+        private void menuItem_sendCommand_Click(object sender, EventArgs e)
         {
-            if (lv_Clients.SelectedItems.Count > 0)
+            if (lv_clients.SelectedItems.Count > 0)
             {
-                ListViewItem lvi = lv_Clients.SelectedItems[0];
-                TcpComm.Server.SessionCommunications session = _server.GetSession(Convert.ToInt32(lvi.SubItems[1].Text));
-                Object ret;
+                ListViewItem selectedItem = lv_clients.SelectedItems[0];
+                TcpComm.Server.SessionCommunications session = _server?.GetSession(Convert.ToInt32(selectedItem.SubItems[1].Text));
 
                 if (session == null)
                 {
@@ -343,37 +324,31 @@ namespace Remote
                     return;
                 }
 
-                CommandForm cmdForm = new CommandForm(lvi.SubItems[2].Text);
+                CommandForm cmdForm = new CommandForm(selectedItem.SubItems[2].Text);
                 cmdForm.ShowDialog();
-                ret = cmdForm.Command;
-                if (ret.ToString() == "")
+                string ret = cmdForm.Command;
+
+                if (string.IsNullOrEmpty(ret))
                 {
                     return;
                 }
 
-                if (session != null)
-                {
-                    string errMsg = "";
-                    _server.SendText(ret.ToString(), 1, session.sessionID, ref errMsg);
-                }
+                string errMsg = string.Empty;
+                _server.SendText(ret.ToString(), 1, session.sessionID, ref errMsg);
             }
         }
 
-        private void DisconnectMenuItem_Click(object sender, EventArgs e)
+        private void menuItem_disconnect_Click(object sender, EventArgs e)
         {
-            if (lv_Clients.SelectedItems.Count > 0)
+            if (lv_clients.SelectedItems.Count > 0)
             {
-                ListViewItem lvi = lv_Clients.SelectedItems[0];
-                TcpComm.Server.SessionCommunications session = _server.GetSession(Convert.ToInt32(lvi.SubItems[1].Text));
-
-                if (session != null)
-                {
-                    session.Close();
-                }
+                ListViewItem selectedItem = lv_clients.SelectedItems[0];
+                TcpComm.Server.SessionCommunications session = _server?.GetSession(Convert.ToInt32(selectedItem.SubItems[1].Text));
+                session?.Close();
             }
         }
 
-        private void button_Help_Click(object sender, EventArgs e)
+        private void button_help_Click(object sender, EventArgs e)
         {
             if (_isHelpFormActive)
             {
@@ -388,15 +363,15 @@ namespace Remote
 
         private void combo_command_Click(object sender, EventArgs e)
         {
-            if (combo_command.Text.Contains(ServerCommands.SVR_CHECKPROCESS))
+            if (combo_command.Text.Contains(ServerCommands.SvrCheckprocess))
             {
                 return;
             }
-            else if (combo_command.Text.Contains(ServerCommands.SVR_KILLPROCESS))
+            else if (combo_command.Text.Contains(ServerCommands.SvrKillprocess))
             {
                 return;
             }
-            else if (combo_command.Text.Contains(ServerCommands.SVR_RUN))
+            else if (combo_command.Text.Contains(ServerCommands.SvrRun))
             {
                 return;
             }
@@ -405,51 +380,36 @@ namespace Remote
 
         }
 
-        private void lv_Clients_ColumnClick(object sender, ColumnClickEventArgs e)
+        private void lv_clients_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (e.Column != _clientsSortColumn)
             {
                 _clientsSortColumn = e.Column;
-                lv_Clients.Sorting = SortOrder.Ascending;
+                lv_clients.Sorting = SortOrder.Ascending;
             }
             else
             {
-                if (lv_Clients.Sorting == SortOrder.Ascending)
-                {
-                    lv_Clients.Sorting = SortOrder.Descending;
-                }
-                else
-                {
-                    lv_Clients.Sorting = SortOrder.Ascending;
-                }
+                lv_clients.Sorting = lv_clients.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
             }
 
-            lv_Clients.Sort();
-            lv_Clients.ListViewItemSorter = new ListViewItemComparer(e.Column, lv_Clients.Sorting);
+            lv_clients.ListViewItemSorter = new ListViewItemComparer(e.Column, lv_clients.Sorting);
+            lv_clients.Sort();
         }
-        #endregion
 
-        private void lv_FileTransfer_ColumnClick(object sender, ColumnClickEventArgs e)
+        private void lv_fileTransfer_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (e.Column != _filesSortColumn)
             {
                 _filesSortColumn = e.Column;
-                lv_FileTransfer.Sorting = SortOrder.Ascending;
+                lv_fileTransfer.Sorting = SortOrder.Ascending;
             }
             else
             {
-                if (lv_FileTransfer.Sorting == SortOrder.Ascending)
-                {
-                    lv_FileTransfer.Sorting = SortOrder.Descending;
-                }
-                else
-                {
-                    lv_FileTransfer.Sorting = SortOrder.Ascending;
-                }
+                lv_fileTransfer.Sorting = lv_fileTransfer.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
             }
 
-            lv_FileTransfer.Sort();
-            lv_FileTransfer.ListViewItemSorter = new ListViewItemComparer(e.Column, lv_FileTransfer.Sorting);
+            lv_fileTransfer.Sort();
+            lv_fileTransfer.ListViewItemSorter = new ListViewItemComparer(e.Column, lv_fileTransfer.Sorting);
         }
     }
 }

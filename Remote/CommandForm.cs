@@ -1,24 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Remote
 {
     public partial class CommandForm : Form
     {
-        private string _commandToReturn;
-
         public CommandForm(string id)
         {
             InitializeComponent();
-            List<string> cmds = ServerCommands.GetCommandList();
-            foreach (var cmd in cmds)
+            List<string> commands = ServerCommands.GetCommandsList();
+            foreach (var cmd in commands)
             {
                 combo_command.Items.Add(cmd);
             }
@@ -28,15 +21,15 @@ namespace Remote
 
         private void combo_command_Click(object sender, EventArgs e)
         {
-            if (combo_command.Text.Contains(ServerCommands.SVR_CHECKPROCESS))
+            if (combo_command.Text.Contains(ServerCommands.SvrCheckprocess))
             {
                 return;
             }
-            else if (combo_command.Text.Contains(ServerCommands.SVR_KILLPROCESS))
+            else if (combo_command.Text.Contains(ServerCommands.SvrKillprocess))
             {
                 return;
             }
-            else if (combo_command.Text.Contains(ServerCommands.SVR_RUN))
+            else if (combo_command.Text.Contains(ServerCommands.SvrRun))
             {
                 return;
             }
@@ -45,32 +38,13 @@ namespace Remote
 
         }
 
-        public string Command
+        public string Command { get; private set; }
+
+        private void button_ok_Click(object sender, EventArgs e)
         {
-            get
-            {
-                return _commandToReturn;
-            }
-
-            private set
-            {
-                _commandToReturn = value;
-            }
-        }
-
-        private void btn_ok_Click(object sender, EventArgs e)
-        {
-            List<string> cmds = ServerCommands.GetCommandList();
-            bool isCorrect = false;
-            foreach (var cmd in cmds)
-            {
-                if(combo_command.Text.Contains(cmd))
-                {
-                    isCorrect = true;
-                    break;
-                }
-            }
-
+            List<string> cmds = ServerCommands.GetCommandsList();
+            bool isCorrect = cmds.Any(cmd => combo_command.Text.Contains((cmd)));
+           
             if (isCorrect)
             {
                 Command = combo_command.Text;
@@ -83,7 +57,7 @@ namespace Remote
             }
         }
 
-        private void btn_cancel_Click(object sender, EventArgs e)
+        private void button_cancel_Click(object sender, EventArgs e)
         {
             Command = "";
             this.DialogResult = DialogResult.Cancel;
@@ -95,7 +69,7 @@ namespace Remote
             // Check if ENTER was pressed
             if(e.KeyChar == (char)13)
             {
-                btn_ok_Click(sender, e);
+                button_ok_Click(sender, e);
             }
         }
     }

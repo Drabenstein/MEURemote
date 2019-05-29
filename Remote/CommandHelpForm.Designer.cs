@@ -33,12 +33,12 @@
             this.column_Command = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.column_Desc = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.column_Syntax = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.kopiujToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menuItem_copy = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.contextMenuStrip1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
+            this.contextMenuStrip.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // lv_commands
@@ -49,12 +49,13 @@
             this.column_Syntax});
             this.lv_commands.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lv_commands.Location = new System.Drawing.Point(0, 0);
+            this.lv_commands.Margin = new System.Windows.Forms.Padding(4);
             this.lv_commands.Name = "lv_commands";
-            this.lv_commands.Size = new System.Drawing.Size(593, 261);
+            this.lv_commands.Size = new System.Drawing.Size(791, 321);
             this.lv_commands.TabIndex = 0;
             this.lv_commands.UseCompatibleStateImageBehavior = false;
             this.lv_commands.View = System.Windows.Forms.View.Details;
-            this.lv_commands.DoubleClick += new System.EventHandler(this.kopiujToolStripMenuItem_Click);
+            this.lv_commands.DoubleClick += new System.EventHandler(this.menuItem_copy_Click);
             // 
             // column_Command
             // 
@@ -71,49 +72,53 @@
             this.column_Syntax.Text = "Przykład";
             this.column_Syntax.Width = 200;
             // 
-            // contextMenuStrip1
+            // contextMenuStrip
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.kopiujToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(109, 26);
+            this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuItem_copy});
+            this.contextMenuStrip.Name = "contextMenuStrip1";
+            this.contextMenuStrip.Size = new System.Drawing.Size(122, 28);
             // 
-            // kopiujToolStripMenuItem
+            // menuItem_copy
             // 
-            this.kopiujToolStripMenuItem.Name = "kopiujToolStripMenuItem";
-            this.kopiujToolStripMenuItem.Size = new System.Drawing.Size(108, 22);
-            this.kopiujToolStripMenuItem.Text = "Kopiuj";
-            this.kopiujToolStripMenuItem.Click += new System.EventHandler(this.kopiujToolStripMenuItem_Click);
+            this.menuItem_copy.Name = "menuItem_copy";
+            this.menuItem_copy.Size = new System.Drawing.Size(121, 24);
+            this.menuItem_copy.Text = "Kopiuj";
+            this.menuItem_copy.Click += new System.EventHandler(this.menuItem_copy_Click);
             // 
-            // statusStrip1
+            // statusStrip
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 239);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(593, 22);
-            this.statusStrip1.TabIndex = 2;
-            this.statusStrip1.Text = "statusStrip1";
+            this.statusStrip.Location = new System.Drawing.Point(0, 295);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
+            this.statusStrip.Size = new System.Drawing.Size(791, 26);
+            this.statusStrip.TabIndex = 2;
+            this.statusStrip.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(238, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(299, 20);
             this.toolStripStatusLabel1.Text = "Kliknij dwa razy, aby skopiować do schowka";
             // 
             // CommandHelpForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(593, 261);
-            this.Controls.Add(this.statusStrip1);
+            this.ClientSize = new System.Drawing.Size(791, 321);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.lv_commands);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "CommandHelpForm";
             this.Text = "Lista poleceń";
-            this.contextMenuStrip1.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.contextMenuStrip.ResumeLayout(false);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -125,9 +130,9 @@
         private System.Windows.Forms.ColumnHeader column_Command;
         private System.Windows.Forms.ColumnHeader column_Desc;
         private System.Windows.Forms.ColumnHeader column_Syntax;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem kopiujToolStripMenuItem;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem menuItem_copy;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
     }
 }
